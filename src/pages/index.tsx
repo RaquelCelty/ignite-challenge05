@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import { useState } from 'react';
+import Header from '../components/Header';
 import { getPrismicClient } from '../services/prismic';
 
 // import commonStyles from '../styles/common.module.scss';
@@ -45,13 +46,7 @@ export default function Home({ postsPagination }: HomeProps) {
         const postsResponse = results.map((post: Post) => {
           return {
             uid: post.uid,
-            first_publication_date: format(
-              new Date(post.first_publication_date),
-              'd MMM yyyy',
-              {
-                locale: ptBR,
-              }
-            ),
+            first_publication_date: post.first_publication_date,
             data: {
               title: post.data.title,
               subtitle: post.data.subtitle,
@@ -72,18 +67,20 @@ export default function Home({ postsPagination }: HomeProps) {
 
   return (
     <>
-      <header className={styles.header}>
-        <img src="Logo.svg" alt="Logo" />
-      </header>
+      <Header />
       <main className={styles.contentContainer}>
         <div className={styles.posts}>
           {posts.map(post => (
-            <a href={`/posts/${post.uid}`} key={post.uid}>
+            <a href={`/post/${post.uid}`} key={post.uid}>
               <strong>{post.data.title}</strong>
               <p>{post.data.subtitle}</p>
               <div>
                 <FiCalendar size="20px" />
-                <time>{post.first_publication_date}</time>
+                <time>
+                  {format(new Date(post.first_publication_date), 'd MMM yyyy', {
+                    locale: ptBR,
+                  })}
+                </time>
                 <FiUser size="20px" /> <span>{post.data.author}</span>
               </div>
             </a>
@@ -117,13 +114,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
-        new Date(post.last_publication_date),
-        'd MMM yyyy',
-        {
-          locale: ptBR,
-        }
-      ),
+      first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,
         subtitle: post.data.subtitle,
