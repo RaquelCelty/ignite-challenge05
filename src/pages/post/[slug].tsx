@@ -73,9 +73,13 @@ export default function Post({ post }: PostProps) {
               </div>
               {post.data.content.map(content => (
                 <div
-                  key={content.heading?.charAt(
-                    Math.floor(Math.random() * content.heading?.length)
-                  )}
+                  key={
+                    content.heading
+                      ? content.heading.charAt(
+                        Math.floor(Math.random() * content.heading?.length)
+                      )
+                      : Math.floor(Math.random())
+                  }
                 >
                   <h2>{content.heading}</h2>
                   <div
