@@ -1,6 +1,6 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-/* eslint-disable react/no-danger */
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { GetStaticPaths, GetStaticProps } from 'next';
@@ -13,6 +13,7 @@ import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
 
+import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 
 interface Post {
@@ -52,7 +53,7 @@ export default function Post({ post }: PostProps) {
 
   return (
     <>
-      <Header />
+      <Header page="slug" />
       <main className={styles.container}>
         {router.isFallback ? (
           <div>Carregando...</div>
@@ -61,7 +62,7 @@ export default function Post({ post }: PostProps) {
             <img src={post.data.banner.url} alt="banner" />
             <article className={styles.post}>
               <h1>{post.data.title}</h1>
-              <div className={styles.postDetails}>
+              <div className={commonStyles.postDetails}>
                 <FiCalendar size="20px" />
                 <time>
                   {format(new Date(post.first_publication_date), 'd MMM yyyy', {
@@ -84,6 +85,7 @@ export default function Post({ post }: PostProps) {
                   <h2>{content.heading}</h2>
                   <div
                     className={styles.postContent}
+                    // eslint-disable-next-line react/no-danger
                     dangerouslySetInnerHTML={{
                       __html: String(RichText.asHtml(content.body)),
                     }}

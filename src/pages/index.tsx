@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Header from '../components/Header';
 import { getPrismicClient } from '../services/prismic';
 
-// import commonStyles from '../styles/common.module.scss';
+import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 
 interface Post {
@@ -68,7 +68,7 @@ export default function Home({ postsPagination }: HomeProps) {
 
   return (
     <>
-      <Header />
+      <Header page="index" />
       <main className={styles.contentContainer}>
         <div className={styles.posts}>
           {posts.map(post => (
@@ -76,7 +76,7 @@ export default function Home({ postsPagination }: HomeProps) {
               <a>
                 <strong>{post.data.title}</strong>
                 <p>{post.data.subtitle}</p>
-                <div>
+                <div className={commonStyles.postDetails}>
                   <FiCalendar size="20px" />
                   <time>
                     {format(
@@ -138,6 +138,7 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       postsPagination,
+      redirect: 60 * 1,
     },
   };
 };

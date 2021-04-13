@@ -7,26 +7,6 @@
   }
 }
 
-.postDetails {
-  font-size: 0.9rem;
-  line-height: 1.1rem;
-
-  color: var(--gray-300);
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-
-  time {
-    margin-right: 26px;
-    margin-left: 8px;
-  }
-
-  span {
-    margin-left: 8px;
-    margin-right: 8px;
-  }
-} 
-
 .post {
   max-width: 720px;
   margin: 5rem auto 0;
