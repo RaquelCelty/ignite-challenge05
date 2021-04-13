@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
 import { FiCalendar, FiUser } from 'react-icons/fi';
 import { useState } from 'react';
+import Link from 'next/link';
 import Header from '../components/Header';
 import { getPrismicClient } from '../services/prismic';
 
@@ -71,19 +72,25 @@ export default function Home({ postsPagination }: HomeProps) {
       <main className={styles.contentContainer}>
         <div className={styles.posts}>
           {posts.map(post => (
-            <a href={`/post/${post.uid}`} key={post.uid}>
-              <strong>{post.data.title}</strong>
-              <p>{post.data.subtitle}</p>
-              <div>
-                <FiCalendar size="20px" />
-                <time>
-                  {format(new Date(post.first_publication_date), 'd MMM yyyy', {
-                    locale: ptBR,
-                  })}
-                </time>
-                <FiUser size="20px" /> <span>{post.data.author}</span>
-              </div>
-            </a>
+            <Link href={`/post/${post.uid}`}>
+              <a key={post.uid}>
+                <strong>{post.data.title}</strong>
+                <p>{post.data.subtitle}</p>
+                <div>
+                  <FiCalendar size="20px" />
+                  <time>
+                    {format(
+                      new Date(post.first_publication_date),
+                      'd MMM yyyy',
+                      {
+                        locale: ptBR,
+                      }
+                    )}
+                  </time>
+                  <FiUser size="20px" /> <span>{post.data.author}</span>
+                </div>
+              </a>
+            </Link>
           ))}
 
           {hasNextPosts && (
