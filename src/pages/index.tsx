@@ -30,16 +30,17 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination;
+  preview: false;
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination, preview }: HomeProps) {
   const [posts, setPosts] = useState<Post[]>(postsPagination.results);
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
   const hasNextPosts = nextPage !== null;
 
   function loadMorePosts() {
-    fetch(postsPagination.next_page)
+    fetch(nextPage)
       .then(response => response.json())
       .then(data => {
         const { results } = data;
@@ -102,19 +103,31 @@ export default function Home({ postsPagination }: HomeProps) {
               Carregar mais posts
             </button>
           )}
+
+          {preview && (
+            <aside className={commonStyles.btnExitPreviewMode}>
+              <Link href="/api/exit-preview">
+                <a>Sair do modo Preview</a>
+              </Link>
+            </aside>
+          )}
         </div>
       </main>
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     Prismic.Predicates.at('document.type', 'posts'),
     {
       fetch: ['post.title', 'post.subtitle'],
-      pageSize: 1,
+      pageSize: 2,
+      ref: previewData?.ref ?? null,
     }
   );
 
@@ -138,7 +151,8 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       postsPagination,
-      redirect: 60 * 1,
+      preview,
     },
+    redirect: 60 * 1,
   };
 };

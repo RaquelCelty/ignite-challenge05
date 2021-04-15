@@ -16,4 +16,32 @@
     margin-left: 8px;
     margin-right: 8px;
   }
-} 
+}
+
+.btnExitPreviewMode {
+  width: 700px;
+  height: 58px;
+
+  margin: 5rem auto 5rem;
+  margin-top: 5rem;
+
+  background: #F8F8F8;  
+  color: #1A1D23;
+  border-radius: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 22px;
+
+  transition: color 0.2s;
+
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.9);
+  }
+}
