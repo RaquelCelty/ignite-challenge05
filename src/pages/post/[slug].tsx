@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { format } from 'date-fns';
@@ -10,6 +9,7 @@ import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import Prismic from '@prismicio/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import Header from '../../components/Header';
 
 import { getPrismicClient } from '../../services/prismic';
@@ -19,6 +19,7 @@ import styles from './post.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     subtitle: string;
@@ -35,13 +36,26 @@ interface Post {
     }[];
   };
 }
-
 interface PostProps {
   post: Post;
+  navigation: {
+    prevPost: {
+      uid: string;
+      data: {
+        title: string;
+      };
+    }[];
+    nextPost: {
+      uid: string;
+      data: {
+        title: string;
+      };
+    }[];
+  };
   preview: boolean;
 }
 
-export default function Post({ post, preview }: PostProps) {
+export default function Post({ post, navigation, preview }: PostProps) {
   const router = useRouter();
 
   const estimateReadingTime = post.data.content.reduce((acc, cur) => {
@@ -52,6 +66,35 @@ export default function Post({ post, preview }: PostProps) {
 
     return Math.ceil(acc + totalWords / 200);
   }, 0);
+
+  const isPostEdited =
+    post.first_publication_date !== post.last_publication_date;
+
+  let editionDate: string;
+  if (isPostEdited) {
+    editionDate = format(
+      new Date(post.first_publication_date),
+      "'* editado em' dd MMM yyyy', às' H':'m",
+      {
+        locale: ptBR,
+      }
+    );
+  }
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    const anchor = document.getElementById('inject-comments-for-uterances');
+    script.async = true;
+    script.setAttribute('src', 'https://utteranc.es/client.js');
+    script.setAttribute('crossorigin', 'anonymous');
+    script.setAttribute(
+      'repo',
+      'https://github.com/RaquelCelty/ignite-challenge05'
+    );
+    script.setAttribute('issue-term', 'pathname');
+    script.setAttribute('theme', 'github-dark');
+    anchor.appendChild(script);
+  }, []);
 
   return (
     <>
@@ -74,16 +117,11 @@ export default function Post({ post, preview }: PostProps) {
                 <FiUser size="20px" /> <span>{post.data.author}</span>
                 <FiClock size="20px" /> <span>{estimateReadingTime} min</span>
               </div>
+              <div className={styles.editedLine}>
+                <span>{isPostEdited && editionDate}</span>
+              </div>
               {post.data.content.map(content => (
-                <div
-                  key={
-                    content.heading
-                      ? content.heading.charAt(
-                        Math.floor(Math.random() * content.heading?.length)
-                      )
-                      : Math.floor(Math.random())
-                  }
-                >
+                <div key={content.heading}>
                   <h2>{content.heading}</h2>
                   <div
                     className={styles.postContent}
@@ -98,6 +136,26 @@ export default function Post({ post, preview }: PostProps) {
           </>
         )}
 
+        <section className={`${styles.navigation} ${styles.post}`}>
+          {navigation?.prevPost.length > 0 && (
+            <div>
+              <h3>{navigation.prevPost[0].data.title}</h3>
+              <Link href={`/post/${navigation.prevPost[0].uid}`}>
+                <a>Post anterior</a>
+              </Link>
+            </div>
+          )}
+
+          {navigation?.nextPost.length > 0 && (
+            <div>
+              <h3>{navigation.nextPost[0].data.title}</h3>
+              <Link href={`/post/${navigation.nextPost[0].uid}`}>
+                <a>Próximo post</a>
+              </Link>
+            </div>
+          )}
+        </section>
+
         {preview && (
           <aside className={commonStyles.btnExitPreviewMode}>
             <Link href="/api/exit-preview">
@@ -105,6 +163,8 @@ export default function Post({ post, preview }: PostProps) {
             </Link>
           </aside>
         )}
+
+        <div id="inject-comments-for-uterances" />
       </main>
     </>
   );
@@ -130,39 +190,67 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params, preview = false, previewData }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
-  const response = await prismic.getByUID('posts', String(slug), { ref: previewData?.ref ?? null });
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   const { data } = response;
 
-  const postResponse = {
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.last_publication_date desc]',
+    }
+  );
+
+  const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: data.title,
       subtitle: data.subtitle,
+      author: data.author,
       banner: {
         url: data.image?.url ? data.image?.url : data.banner.url,
       },
-      author: data.author,
+      content: data.content.map(content => {
+        return {
+          heading: content.heading,
+          body: [...content.body],
+        };
+      }),
     },
   };
 
-  const contents = data.content.map(content => {
-    return {
-      heading: content.heading,
-      body: content.body,
-    };
-  });
-
-  const postDataContent = { ...postResponse.data, content: contents };
-  const post = { ...postResponse, data: postDataContent };
-
   return {
-    props: { post, preview },
+    props: {
+      post,
+      navigation: {
+        prevPost: prevPost?.results,
+        nextPost: nextPost?.results,
+      },
+      preview,
+    },
     redirect: 60 * 1,
   };
 };
