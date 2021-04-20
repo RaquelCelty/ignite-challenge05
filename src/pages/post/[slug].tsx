@@ -81,21 +81,6 @@ export default function Post({ post, navigation, preview }: PostProps) {
     );
   }
 
-  useEffect(() => {
-    const script = document.createElement('script');
-    const anchor = document.getElementById('inject-comments-for-uterances');
-    script.async = true;
-    script.setAttribute('src', 'https://utteranc.es/client.js');
-    script.setAttribute('crossorigin', 'anonymous');
-    script.setAttribute(
-      'repo',
-      'https://github.com/RaquelCelty/ignite-challenge05'
-    );
-    script.setAttribute('issue-term', 'pathname');
-    script.setAttribute('theme', 'github-dark');
-    anchor.appendChild(script);
-  }, []);
-
   return (
     <>
       <Header page="slug" />
@@ -155,6 +140,26 @@ export default function Post({ post, navigation, preview }: PostProps) {
             </div>
           )}
         </section>
+
+        <section
+          ref={elem => {
+            if (!elem || elem.childNodes.length) {
+              return;
+            }
+            const scriptElem = document.createElement('script');
+            scriptElem.src = 'https://utteranc.es/client.js';
+            scriptElem.async = true;
+            scriptElem.crossOrigin = 'anonymous';
+            scriptElem.setAttribute(
+              'repo',
+              'https://github.com/RaquelCelty/ignite-challenge05'
+            );
+            scriptElem.setAttribute('issue-term', 'pathname');
+            scriptElem.setAttribute('label', 'blog-comment');
+            scriptElem.setAttribute('theme', 'github-light');
+            elem.appendChild(scriptElem);
+          }}
+        />
 
         {preview && (
           <aside className={commonStyles.btnExitPreviewMode}>
