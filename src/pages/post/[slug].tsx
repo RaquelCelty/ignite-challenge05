@@ -85,10 +85,7 @@ export default function Post({ post, navigation, preview }: PostProps) {
     const script = document.createElement('script');
     const anchor = document.getElementById('utterances');
     script.setAttribute('src', 'https://utteranc.es/client.js');
-    script.setAttribute(
-      'repo',
-      'https://github.com/RaquelCelty/ignite-challenge05'
-    );
+    script.setAttribute('repo', 'RaquelCelty/ignite-challenge05');
     script.setAttribute('crossorigin', 'anonymous');
     script.setAttribute('issue-term', 'pathname');
     script.setAttribute('theme', 'github-dark');
@@ -156,6 +153,8 @@ export default function Post({ post, navigation, preview }: PostProps) {
           )}
         </section>
 
+        <div id="utterances" className={styles.utterancesComment} />
+
         {preview && (
           <aside className={commonStyles.btnExitPreviewMode}>
             <Link href="/api/exit-preview">
@@ -163,8 +162,6 @@ export default function Post({ post, navigation, preview }: PostProps) {
             </Link>
           </aside>
         )}
-
-        <div id="utterances" />
       </main>
     </>
   );
